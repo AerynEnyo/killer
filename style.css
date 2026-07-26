@@ -54,22 +54,42 @@ body{
     text-align:center;
 }
 #suspectList{
-    display:flex;
-    flex-direction:column;
-    gap:6px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    gap:12px;
+
     overflow-y:auto;
     height:calc(100vh - 160px);
-    padding-right:10px;
+
+    padding:5px;
 }
 
+/* Individual Card */
 .suspect{
     background:#333;
-    padding:10px;
-    border-radius:6px;
     border:1px solid #555;
-    transition:background 0.2s;
+    border-radius:8px;
+
+    min-height:70px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:18px;
+    font-weight:bold;
+    text-align:center;
+
+    cursor:pointer;
+    transition:0.2s;
 }
 
 .suspect:hover{
     background:#444;
+    border-color:#888;
+    transform:translateY(-2px);
+}
+
+.suspect:active{
+    transform:scale(.97);
 }

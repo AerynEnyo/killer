@@ -116,7 +116,7 @@ async function startGame() {
 
         remainingSuspectsElement.textContent = "0";
     }
-}
+
 
 
 /* =========================================================

@@ -1,0 +1,181 @@
+/* Remove browser defaults */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+
+    background: #202124;
+    color: #ffffff;
+
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Top banner */
+.top-bar {
+    flex-shrink: 0;
+
+    width: 100%;
+    height: 96px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #2d2f31;
+    border-bottom: 2px solid #555555;
+}
+
+.top-bar h1 {
+    font-size: 32px;
+    text-align: center;
+}
+
+/* Main two-column layout */
+.board {
+    flex: 1;
+    min-height: 0;
+
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+}
+
+/* Shared panel layout */
+.panel {
+    min-width: 0;
+    min-height: 0;
+
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.clues-panel {
+    border-right: 1px solid #555555;
+}
+
+.panel-header {
+    padding-bottom: 10px;
+
+    text-align: center;
+    font-size: 26px;
+
+    border-bottom: 2px solid #666666;
+}
+
+/* Clues */
+.clue-list {
+    flex: 1;
+    min-height: 0;
+
+    padding-top: 14px;
+
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-rows: minmax(60px, 1fr);
+    gap: 12px;
+
+    overflow-y: auto;
+}
+
+.clue-row {
+    min-height: 60px;
+
+    background: #333333;
+    border: 1px solid #555555;
+    border-radius: 8px;
+}
+
+/* Suspects heading and counter */
+.suspects-heading {
+    flex-shrink: 0;
+}
+
+.remaining-counter {
+    margin-top: 12px;
+
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+#remainingCount {
+    color: #dddddd;
+}
+
+/* Suspect rows and columns */
+.suspect-grid {
+    flex: 1;
+    min-height: 0;
+
+    margin-top: 14px;
+    padding: 5px;
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    grid-auto-rows: minmax(80px, 1fr);
+    gap: 12px;
+
+    overflow-y: auto;
+}
+
+.suspect-cell {
+    min-height: 80px;
+
+    background: #333333;
+    border: 1px solid #555555;
+    border-radius: 8px;
+}
+
+/* Tablet layout */
+@media (max-width: 900px) {
+    .suspect-grid {
+        grid-template-columns: repeat(3, minmax(110px, 1fr));
+    }
+}
+
+/* Phone layout */
+@media (max-width: 650px) {
+    body {
+        height: auto;
+        min-height: 100%;
+    }
+
+    .top-bar {
+        height: 76px;
+    }
+
+    .top-bar h1 {
+        font-size: 25px;
+    }
+
+    .board {
+        display: block;
+    }
+
+    .panel {
+        min-height: 500px;
+        padding: 14px;
+    }
+
+    .clues-panel {
+        border-right: none;
+        border-bottom: 1px solid #555555;
+    }
+
+    .suspect-grid {
+        grid-template-columns: repeat(2, minmax(100px, 1fr));
+        grid-auto-rows: 90px;
+    }
+}

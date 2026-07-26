@@ -103,7 +103,7 @@ async function startGame() {
             console.log("Killer:", killer.name, killer.gender);
         */
 
-    } catch (error) {
+        } catch (error) {
         console.error(error);
 
         cluesContainer.innerHTML = "";
@@ -116,9 +116,6 @@ async function startGame() {
 
         remainingSuspectsElement.textContent = "0";
     }
-);
-
-
 }
 
 

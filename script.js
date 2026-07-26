@@ -1120,6 +1120,12 @@ function verifyGuess() {
 /* =========================================================
    START
 ========================================================= */
+
+guessButton.addEventListener(
+    "click",
+    verifyGuess
+);
+
 guessInput.addEventListener(
     "keydown",
     function (event) {
@@ -1128,4 +1134,5 @@ guessInput.addEventListener(
         }
     }
 );
+
 startGame();

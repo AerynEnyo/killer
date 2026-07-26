@@ -16,8 +16,7 @@ let eliminatedSuspects = 0;
 
 
 /*
-    Updates the number displayed at the bottom
-    of the clues column.
+    Updates the remaining-suspects counter.
 */
 
 function updateRemainingSuspects() {
@@ -30,10 +29,10 @@ function updateRemainingSuspects() {
 
 
 /*
-    Adds one clue.
+    Adds a clue to the clues column.
 
     Example:
-    addClue("The killer was wearing blue.");
+    addClue("The killer was wearing a hat.");
 */
 
 function addClue(clueText) {
@@ -50,7 +49,10 @@ function addClue(clueText) {
 
 
 /*
-    Adds one suspect.
+    Adds a suspect to the suspects column.
+
+    Clicking a suspect marks or unmarks them
+    as eliminated.
 
     Example:
     addSuspect("Alex");
@@ -94,7 +96,7 @@ function addSuspect(suspectName) {
 
 
 /*
-    Deletes all displayed clues.
+    Removes every clue.
 */
 
 function clearClues() {
@@ -103,8 +105,7 @@ function clearClues() {
 
 
 /*
-    Deletes all displayed suspects and resets
-    the remaining-suspects counter.
+    Removes every suspect and resets the counter.
 */
 
 function clearSuspects() {
@@ -118,8 +119,7 @@ function clearSuspects() {
 
 
 /*
-    Allows you to manually display a number
-    without adding suspect cells.
+    Sets the counter manually without creating suspects.
 
     Example:
     setRemainingSuspects(500);
@@ -139,7 +139,7 @@ function setRemainingSuspects(amount) {
 
 
 /*
-    Start at zero without creating any cells.
+    Starts empty.
 */
 
 updateRemainingSuspects();

@@ -1,5 +1,5 @@
 /* =========================
-   PAGE RESET
+   RESET
 ========================= */
 
 * {
@@ -17,7 +17,13 @@ body {
 body {
     min-height: 100vh;
 
-    background-color: #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow: auto;
+
+    background-color: #1d1d1d;
     color: #ffffff;
 
     font-family: Arial, Helvetica, sans-serif;
@@ -25,166 +31,185 @@ body {
 
 
 /* =========================
-   MAIN BOARD
+   FIXED GAME BOARD
 ========================= */
 
 .game-board {
-    width: 100%;
-    min-height: 100vh;
+    width: 1200px;
+    height: 700px;
+
+    flex: 0 0 auto;
 
     display: grid;
-    grid-template-columns: minmax(280px, 1fr) minmax(500px, 2fr);
+    grid-template-columns: 400px 800px;
+
+    overflow: hidden;
+
+    background-color: #222222;
+    border: 1px solid #4a4a4a;
 }
 
 
 /* =========================
-   SHARED SECTION STYLES
+   COLUMN STRUCTURE
 ========================= */
 
 .clues-section,
 .suspects-section {
     min-width: 0;
-    min-height: 100vh;
+    min-height: 0;
 
     display: flex;
     flex-direction: column;
+
+    background-color: #222222;
 }
 
 .clues-section {
-    border-right: 2px solid #4c4c4c;
+    border-right: 1px solid #4a4a4a;
 }
 
-.section-header {
-    min-height: 90px;
-    padding: 20px;
+
+/* =========================
+   SECTION HEADERS
+========================= */
+
+.section-title {
+    width: 100%;
+    height: 84px;
+
+    flex: 0 0 84px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background-color: #2a2a2a;
-    border-bottom: 2px solid #4c4c4c;
-}
+    background-color: #2b2b2b;
+    border-bottom: 1px solid #4a4a4a;
 
-.section-header h1 {
-    font-size: 32px;
+    font-size: 30px;
     font-weight: 700;
     text-align: center;
 }
 
 
 /* =========================
-   CLUES
+   CLUES CONTAINER
 ========================= */
 
 .clues-container {
     flex: 1;
+    min-height: 0;
+
+    padding: 14px;
 
     display: flex;
     flex-direction: column;
-
-    gap: 12px;
-    padding: 18px;
+    gap: 10px;
 
     overflow-y: auto;
 }
 
 
-/* Styling for clue rows added later */
+/* Clues are not automatically created */
 
 .clue-row {
     width: 100%;
-    min-height: 65px;
+    min-height: 55px;
 
-    padding: 15px;
+    flex: 0 0 auto;
+
+    padding: 12px;
 
     display: flex;
     align-items: center;
 
-    background-color: #333333;
-
-    border: 1px solid #555555;
-    border-radius: 6px;
-}
-
-.clue-row:hover {
-    background-color: #3a3a3a;
+    background-color: #303030;
+    border: 1px solid #4d4d4d;
 }
 
 
 /* =========================
-   SUSPECTS HEADER
+   BOTTOM LEFT ROWS
 ========================= */
 
-.suspects-header {
-    flex-direction: column;
-    gap: 8px;
-}
+.hunt-row,
+.remaining-row {
+    width: 100%;
+    height: 58px;
 
-.remaining-counter {
-    font-size: 18px;
-    font-weight: 700;
-    text-align: center;
-}
-
-#remainingSuspects {
-    display: inline-block;
-
-    min-width: 30px;
-
-    color: #f1f1f1;
-}
-
-
-/* =========================
-   SUSPECTS
-========================= */
-
-.suspects-container {
-    flex: 1;
-
-    display: grid;
-    grid-template-columns: repeat(4, minmax(130px, 1fr));
-    align-content: start;
-
-    gap: 12px;
-    padding: 18px;
-
-    overflow-y: auto;
-}
-
-
-/* Styling for suspect cells added later */
-
-.suspect-cell {
-    min-width: 0;
-    min-height: 75px;
-
-    padding: 15px;
+    flex: 0 0 58px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background-color: #333333;
+    background-color: #2b2b2b;
+    border-top: 1px solid #4a4a4a;
 
-    border: 1px solid #555555;
-    border-radius: 6px;
+    text-align: center;
+}
+
+.hunt-row {
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.remaining-row {
+    gap: 6px;
+
+    font-size: 18px;
+    font-weight: 700;
+}
+
+#remainingSuspects {
+    min-width: 24px;
+    display: inline-block;
+}
+
+
+/* =========================
+   SUSPECTS CONTAINER
+========================= */
+
+.suspects-container {
+    flex: 1;
+    min-height: 0;
+
+    padding: 14px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 68px;
+    align-content: start;
+    gap: 10px;
+
+    overflow-y: auto;
+}
+
+
+/* Suspects are not automatically created */
+
+.suspect-cell {
+    min-width: 0;
+    min-height: 0;
+
+    padding: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #303030;
+    border: 1px solid #4d4d4d;
 
     text-align: center;
     cursor: pointer;
-
     user-select: none;
-
-    transition:
-        background-color 0.15s ease,
-        opacity 0.15s ease,
-        transform 0.15s ease;
 }
 
 .suspect-cell:hover {
-    background-color: #3d3d3d;
-    transform: translateY(-1px);
+    background-color: #383838;
 }
 
 .suspect-cell.eliminated {
@@ -194,88 +219,34 @@ body {
 
 
 /* =========================
-   EMPTY CONTAINERS
+   SCROLLBARS
 ========================= */
 
-.clues-container:empty,
-.suspects-container:empty {
-    min-height: 100px;
+.clues-container::-webkit-scrollbar,
+.suspects-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.clues-container::-webkit-scrollbar-track,
+.suspects-container::-webkit-scrollbar-track {
+    background-color: #222222;
+}
+
+.clues-container::-webkit-scrollbar-thumb,
+.suspects-container::-webkit-scrollbar-thumb {
+    background-color: #555555;
 }
 
 
 /* =========================
-   TABLET
+   SMALLER SCREENS
 ========================= */
 
-@media screen and (max-width: 1000px) {
-    .game-board {
-        grid-template-columns: minmax(240px, 1fr) minmax(400px, 2fr);
-    }
+@media screen and (max-width: 1220px),
+       screen and (max-height: 720px) {
 
-    .suspects-container {
-        grid-template-columns: repeat(3, minmax(120px, 1fr));
-    }
-}
-
-
-/* =========================
-   SMALL TABLET
-========================= */
-
-@media screen and (max-width: 750px) {
-    .game-board {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .clues-section,
-    .suspects-section {
-        min-height: auto;
-    }
-
-    .clues-section {
-        border-right: none;
-        border-bottom: 2px solid #4c4c4c;
-    }
-
-    .clues-container {
-        min-height: 250px;
-        max-height: 400px;
-    }
-
-    .suspects-container {
-        min-height: 400px;
-
-        grid-template-columns: repeat(3, minmax(100px, 1fr));
-    }
-}
-
-
-/* =========================
-   PHONE
-========================= */
-
-@media screen and (max-width: 500px) {
-    .section-header {
-        min-height: 75px;
-        padding: 14px;
-    }
-
-    .section-header h1 {
-        font-size: 26px;
-    }
-
-    .remaining-counter {
-        font-size: 16px;
-    }
-
-    .clues-container,
-    .suspects-container {
-        gap: 8px;
-        padding: 10px;
-    }
-
-    .suspects-container {
-        grid-template-columns: repeat(2, minmax(100px, 1fr));
+    body {
+        align-items: flex-start;
+        justify-content: flex-start;
     }
 }

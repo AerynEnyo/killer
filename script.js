@@ -1,5 +1,6 @@
 "use strict";
 
+
 /* =========================================================
    PAGE ELEMENTS
 ========================================================= */
@@ -15,19 +16,10 @@ const remainingSuspectsElement =
 
 
 /* =========================================================
-   GAME SETTINGS
+   SETTINGS
 ========================================================= */
 
 const SUSPECT_COUNT = 500;
-
-/*
-    The generator normally creates enough clues to leave
-    exactly one suspect.
-
-    This prevents an unusually difficult name from creating
-    an excessive number of clue rows.
-*/
-
 const MAX_CLUES = 30;
 
 
@@ -41,7 +33,7 @@ let generatedClues = [];
 
 
 /* =========================================================
-   LOAD NAMES AND START GAME
+   START THE GAME
 ========================================================= */
 
 async function startGame() {
@@ -57,57 +49,48 @@ async function startGame() {
         }
 
         const fileText = await response.text();
-
         const allPeople = parseNamesFile(fileText);
 
         if (allPeople.length === 0) {
             throw new Error(
-                "names.txt did not contain any valid names."
-            );
-        }
-
-        if (allPeople.length < SUSPECT_COUNT) {
-            console.warn(
-                `Only ${allPeople.length} valid names were found.`
+                "names.txt does not contain any valid names."
             );
         }
 
         shuffleArray(allPeople);
 
-        suspects = allPeople
-            .slice(0, Math.min(SUSPECT_COUNT, allPeople.length))
-            .map((person, index) => {
-                return {
-                    id: index,
-                    name: person.name,
-                    gender: person.gender,
+        const selectedPeople =
+            allPeople.slice(
+                0,
+                Math.min(SUSPECT_COUNT, allPeople.length)
+            );
 
-                    element: null,
-
-                    /*
-                        A suspect can be eliminated manually
-                        or by failing one or more clues.
-                    */
-
-                    manuallyEliminated: false,
-                    failedClues: new Set()
-                };
-            });
+        suspects = selectedPeople.map((person, index) => {
+            return {
+                id: index,
+                name: person.name,
+                gender: person.gender,
+                eliminated: false,
+                element: null
+            };
+        });
 
         killer =
-            suspects[Math.floor(Math.random() * suspects.length)];
+            suspects[
+                Math.floor(Math.random() * suspects.length)
+            ];
 
         generatedClues =
             generateClues(suspects, killer);
 
-        renderSuspects();
         renderClues();
-        updateAllSuspectStates();
+        renderSuspects();
+        updateRemainingSuspects();
 
         /*
-            The killer is intentionally not shown on the page.
+            The killer is not displayed anywhere.
 
-            Uncomment this temporarily while testing:
+            For temporary testing only, you can uncomment:
 
             console.log("Killer:", killer.name, killer.gender);
         */
@@ -129,7 +112,12 @@ async function startGame() {
 
 
 /* =========================================================
-   PARSE names.txt
+   READ names.txt
+
+   Expected format:
+
+   Aaron,M
+   Abby,F
 ========================================================= */
 
 function parseNamesFile(fileText) {
@@ -145,7 +133,8 @@ function parseNamesFile(fileText) {
             continue;
         }
 
-        const commaPosition = line.lastIndexOf(",");
+        const commaPosition =
+            line.lastIndexOf(",");
 
         if (commaPosition === -1) {
             continue;
@@ -169,7 +158,7 @@ function parseNamesFile(fileText) {
         }
 
         const uniqueKey =
-            `${name.toLocaleLowerCase()}|${gender}`;
+            `${normalizeName(name)}|${gender}`;
 
         if (usedEntries.has(uniqueKey)) {
             continue;
@@ -188,116 +177,92 @@ function parseNamesFile(fileText) {
 
 
 /* =========================================================
-   CLUE GENERATION
+   GENERATE CLUES
+
+   Every clue is true for the killer.
+
+   Broad clues are preferred over clues that identify only
+   one letter position.
 ========================================================= */
 
 function generateClues(allSuspects, selectedKiller) {
     const cluePool =
         createCluePool(selectedKiller);
 
-    const chosenClues = [];
+    const selectedClues = [];
 
-    let possibleSuspects = [...allSuspects];
-    let clueNumber = 0;
+    let possibleSuspects =
+        [...allSuspects];
 
     while (
         possibleSuspects.length > 1 &&
-        chosenClues.length < MAX_CLUES
+        selectedClues.length < MAX_CLUES
     ) {
-        const usableClues = cluePool
-            .filter(clue => {
-                if (clue.used) {
-                    return false;
-                }
+        const choices = [];
 
-                /*
-                    Every selected clue must be true
-                    for the killer.
-                */
+        for (const clue of cluePool) {
+            if (clue.used) {
+                continue;
+            }
 
-                if (!clue.test(selectedKiller)) {
-                    return false;
-                }
+            if (!clue.test(selectedKiller)) {
+                continue;
+            }
 
-                const survivors =
-                    possibleSuspects.filter(clue.test);
+            const survivors =
+                possibleSuspects.filter(clue.test);
 
-                /*
-                    The clue must eliminate at least one
-                    currently possible suspect.
-                */
+            if (
+                survivors.length === 0 ||
+                survivors.length === possibleSuspects.length
+            ) {
+                continue;
+            }
 
-                return (
-                    survivors.length > 0 &&
-                    survivors.length < possibleSuspects.length
-                );
-            })
-            .map(clue => {
-                const survivors =
-                    possibleSuspects.filter(clue.test);
+            const eliminated =
+                possibleSuspects.length - survivors.length;
 
-                const eliminated =
-                    possibleSuspects.length - survivors.length;
+            const eliminatedRatio =
+                eliminated / possibleSuspects.length;
 
-                const survivorRatio =
-                    survivors.length / possibleSuspects.length;
+            /*
+                Broad clues receive a higher priority.
 
-                /*
-                    Prefer clues that remove a meaningful group.
+                Specific letter-position clues are saved for
+                the end when broad clues are no longer enough.
+            */
 
-                    A split near 50% is generally more useful
-                    than a clue that removes only one person.
+            const score =
+                eliminatedRatio * 100 +
+                clue.priority;
 
-                    Generic clues receive a bonus over positional
-                    letter clues.
-                */
-
-                const balanceScore =
-                    1 - Math.abs(0.5 - survivorRatio);
-
-                const groupEliminationBonus =
-                    eliminated > 1 ? 2 : 0;
-
-                const genericBonus =
-                    clue.priority ?? 0;
-
-                const score =
-                    balanceScore * 100 +
-                    groupEliminationBonus +
-                    genericBonus;
-
-                return {
-                    clue: clue,
-                    survivors: survivors,
-                    eliminated: eliminated,
-                    score: score
-                };
-            })
-            .sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-
-                return b.eliminated - a.eliminated;
+            choices.push({
+                clue: clue,
+                survivors: survivors,
+                eliminated: eliminated,
+                score: score
             });
+        }
 
-        if (usableClues.length === 0) {
+        if (choices.length === 0) {
             break;
         }
 
-        const bestChoice = usableClues[0];
+        choices.sort((first, second) => {
+            if (second.score !== first.score) {
+                return second.score - first.score;
+            }
+
+            return second.eliminated - first.eliminated;
+        });
+
+        const bestChoice = choices[0];
 
         bestChoice.clue.used = true;
 
-        clueNumber++;
-
-        chosenClues.push({
-            id: clueNumber,
+        selectedClues.push({
             text: bestChoice.clue.text,
-            test: bestChoice.clue.test,
-            active: false,
-            eliminatedWhenGenerated:
-                bestChoice.eliminated
+            test: bestChoice.clue.test
         });
 
         possibleSuspects =
@@ -305,155 +270,146 @@ function generateClues(allSuspects, selectedKiller) {
     }
 
     /*
-        Positional clues should normally leave exactly one name.
-
-        This fallback is only reached when two entries cannot be
-        distinguished using their name or gender.
+        This fallback guarantees that the clues can separate
+        the killer from every other selected suspect.
     */
 
     if (possibleSuspects.length > 1) {
-        clueNumber++;
-
-        chosenClues.push({
-            id: clueNumber,
+        selectedClues.push({
             text:
-                `Their full name is ${selectedKiller.name}.`,
+                `The killer's complete name contains exactly ` +
+                `${getLettersOnly(selectedKiller.name).length} letters ` +
+                `and begins with ${getLettersOnly(selectedKiller.name)
+                    .charAt(0)
+                    .toUpperCase()}.`,
+
             test: person => {
                 return (
                     normalizeName(person.name) ===
                     normalizeName(selectedKiller.name)
                 );
-            },
-            active: false,
-            eliminatedWhenGenerated:
-                possibleSuspects.length - 1,
-            fallback: true
+            }
         });
     }
 
-    return chosenClues;
+    return selectedClues;
 }
 
 
 /* =========================================================
-   CREATE AVAILABLE CLUES
+   BUILD THE AVAILABLE CLUE POOL
 ========================================================= */
 
 function createCluePool(selectedKiller) {
     const clues = [];
 
-    const killerName =
-        normalizeName(selectedKiller.name);
-
     const killerLetters =
-        getLettersOnly(killerName);
+        getLettersOnly(selectedKiller.name);
 
     const killerLength =
         killerLetters.length;
-
-    const killerVowels =
-        countVowels(killerLetters);
-
-    const killerConsonants =
-        killerLength - killerVowels;
-
-    const killerUniqueLetters =
-        new Set(killerLetters).size;
 
     const firstLetter =
         killerLetters.charAt(0);
 
     const lastLetter =
-        killerLetters.charAt(killerLetters.length - 1);
+        killerLetters.charAt(killerLength - 1);
+
+    const killerVowelCount =
+        countVowels(killerLetters);
+
+    const killerConsonantCount =
+        killerLength - killerVowelCount;
+
+    const killerHasRepeatedLetters =
+        hasRepeatedLetter(killerLetters);
+
+    const killerUniqueLetterCount =
+        new Set(killerLetters).size;
 
 
-    /* ---------------------------------------------------------
+    /* -----------------------------------------------------
        GENDER
-    --------------------------------------------------------- */
-
-    if (selectedKiller.gender === "M") {
-        clues.push({
-            text: "The killer is male.",
-            priority: 25,
-            test: person => person.gender === "M"
-        });
-    }
-
-    if (selectedKiller.gender === "F") {
-        clues.push({
-            text: "The killer is female.",
-            priority: 25,
-            test: person => person.gender === "F"
-        });
-    }
-
-
-    /* ---------------------------------------------------------
-       NAME LENGTH
-    --------------------------------------------------------- */
+    ----------------------------------------------------- */
 
     clues.push({
         text:
-            `The killer's name contains exactly ` +
-            `${killerLength} letters.`,
-        priority: 18,
+            selectedKiller.gender === "M"
+                ? "The killer is male."
+                : "The killer is female.",
+
+        priority: 100,
+
         test: person => {
-            return getLettersOnly(person.name).length === killerLength;
+            return person.gender === selectedKiller.gender;
         }
     });
+
+
+    /* -----------------------------------------------------
+       BROAD NAME LENGTH CLUES
+    ----------------------------------------------------- */
 
     clues.push({
         text:
             killerLength % 2 === 0
                 ? "The killer's name has an even number of letters."
                 : "The killer's name has an odd number of letters.",
-        priority: 20,
-        test: person => {
-            const length =
-                getLettersOnly(person.name).length;
 
-            return length % 2 === killerLength % 2;
+        priority: 95,
+
+        test: person => {
+            return (
+                getLettersOnly(person.name).length % 2 ===
+                killerLength % 2
+            );
         }
     });
 
-    const lengthRanges = [
+
+    const lengthGroups = [
         {
-            min: 1,
-            max: 4,
-            text: "The killer's name has four letters or fewer."
+            minimum: 1,
+            maximum: 4,
+            text:
+                "The killer's name contains four letters or fewer."
         },
         {
-            min: 5,
-            max: 6,
-            text: "The killer's name has five or six letters."
+            minimum: 5,
+            maximum: 6,
+            text:
+                "The killer's name contains five or six letters."
         },
         {
-            min: 7,
-            max: 8,
-            text: "The killer's name has seven or eight letters."
+            minimum: 7,
+            maximum: 8,
+            text:
+                "The killer's name contains seven or eight letters."
         },
         {
-            min: 9,
-            max: Infinity,
-            text: "The killer's name has at least nine letters."
+            minimum: 9,
+            maximum: Infinity,
+            text:
+                "The killer's name contains at least nine letters."
         }
     ];
 
-    for (const range of lengthRanges) {
+    for (const group of lengthGroups) {
         if (
-            killerLength >= range.min &&
-            killerLength <= range.max
+            killerLength >= group.minimum &&
+            killerLength <= group.maximum
         ) {
             clues.push({
-                text: range.text,
-                priority: 21,
+                text: group.text,
+                priority: 95,
+
                 test: person => {
                     const length =
                         getLettersOnly(person.name).length;
 
                     return (
-                        length >= range.min &&
-                        length <= range.max
+                        length >= group.minimum &&
+                        length <= group.maximum
                     );
                 }
             });
@@ -461,83 +417,9 @@ function createCluePool(selectedKiller) {
     }
 
 
-    /* ---------------------------------------------------------
-       FIRST AND LAST LETTER
-    --------------------------------------------------------- */
-
-    clues.push({
-        text:
-            `The killer's name begins with the letter ` +
-            `${firstLetter.toUpperCase()}.`,
-        priority: 14,
-        test: person => {
-            return (
-                getLettersOnly(person.name).charAt(0) ===
-                firstLetter
-            );
-        }
-    });
-
-    clues.push({
-        text:
-            `The killer's name ends with the letter ` +
-            `${lastLetter.toUpperCase()}.`,
-        priority: 14,
-        test: person => {
-            const letters =
-                getLettersOnly(person.name);
-
-            return (
-                letters.charAt(letters.length - 1) ===
-                lastLetter
-            );
-        }
-    });
-
-    clues.push({
-        text:
-            isVowel(firstLetter)
-                ? "The killer's name begins with a vowel."
-                : "The killer's name begins with a consonant.",
-        priority: 22,
-        test: person => {
-            const letter =
-                getLettersOnly(person.name).charAt(0);
-
-            return (
-                isVowel(letter) ===
-                isVowel(firstLetter)
-            );
-        }
-    });
-
-    clues.push({
-        text:
-            isVowel(lastLetter)
-                ? "The killer's name ends with a vowel."
-                : "The killer's name ends with a consonant.",
-        priority: 22,
-        test: person => {
-            const letters =
-                getLettersOnly(person.name);
-
-            const letter =
-                letters.charAt(letters.length - 1);
-
-            return (
-                isVowel(letter) ===
-                isVowel(lastLetter)
-            );
-        }
-    });
-
-
-    /* ---------------------------------------------------------
-       ALPHABETICAL GROUPS
-    --------------------------------------------------------- */
-
-    const firstCode =
-        firstLetter.charCodeAt(0);
+    /* -----------------------------------------------------
+       BROAD FIRST-LETTER GROUPS
+    ----------------------------------------------------- */
 
     const alphabetGroups = [
         {
@@ -568,22 +450,20 @@ function createCluePool(selectedKiller) {
 
     for (const group of alphabetGroups) {
         if (
-            firstCode >= group.start.charCodeAt(0) &&
-            firstCode <= group.end.charCodeAt(0)
+            firstLetter >= group.start &&
+            firstLetter <= group.end
         ) {
             clues.push({
                 text: group.text,
-                priority: 24,
+                priority: 100,
+
                 test: person => {
                     const letter =
                         getLettersOnly(person.name).charAt(0);
 
-                    const code =
-                        letter.charCodeAt(0);
-
                     return (
-                        code >= group.start.charCodeAt(0) &&
-                        code <= group.end.charCodeAt(0)
+                        letter >= group.start &&
+                        letter <= group.end
                     );
                 }
             });
@@ -591,101 +471,222 @@ function createCluePool(selectedKiller) {
     }
 
 
-    /* ---------------------------------------------------------
-       VOWELS AND CONSONANTS
-    --------------------------------------------------------- */
+    /* -----------------------------------------------------
+       VOWEL OR CONSONANT
+    ----------------------------------------------------- */
 
     clues.push({
         text:
-            `The killer's name contains exactly ` +
-            `${killerVowels} vowel${killerVowels === 1 ? "" : "s"}.`,
-        priority: 17,
+            isVowel(firstLetter)
+                ? "The killer's name begins with a vowel."
+                : "The killer's name begins with a consonant.",
+
+        priority: 90,
+
         test: person => {
+            const letter =
+                getLettersOnly(person.name).charAt(0);
+
             return (
-                countVowels(getLettersOnly(person.name)) ===
-                killerVowels
+                isVowel(letter) ===
+                isVowel(firstLetter)
             );
         }
     });
 
+
+    clues.push({
+        text:
+            isVowel(lastLetter)
+                ? "The killer's name ends with a vowel."
+                : "The killer's name ends with a consonant.",
+
+        priority: 90,
+
+        test: person => {
+            const letters =
+                getLettersOnly(person.name);
+
+            const letter =
+                letters.charAt(letters.length - 1);
+
+            return (
+                isVowel(letter) ===
+                isVowel(lastLetter)
+            );
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       REPEATED LETTERS
+    ----------------------------------------------------- */
+
+    clues.push({
+        text:
+            killerHasRepeatedLetters
+                ? "The killer's name repeats at least one letter."
+                : "The killer's name does not repeat any letters.",
+
+        priority: 85,
+
+        test: person => {
+            return (
+                hasRepeatedLetter(
+                    getLettersOnly(person.name)
+                ) === killerHasRepeatedLetters
+            );
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       VOWEL AMOUNT GROUP
+    ----------------------------------------------------- */
+
+    clues.push({
+        text:
+            killerVowelCount >= 3
+                ? "The killer's name contains at least three vowels."
+                : "The killer's name contains fewer than three vowels.",
+
+        priority: 85,
+
+        test: person => {
+            const vowelCount =
+                countVowels(
+                    getLettersOnly(person.name)
+                );
+
+            return killerVowelCount >= 3
+                ? vowelCount >= 3
+                : vowelCount < 3;
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       EXACT COUNTS
+    ----------------------------------------------------- */
+
     clues.push({
         text:
             `The killer's name contains exactly ` +
-            `${killerConsonants} consonant` +
-            `${killerConsonants === 1 ? "" : "s"}.`,
-        priority: 16,
+            `${killerLength} letters.`,
+
+        priority: 75,
+
+        test: person => {
+            return (
+                getLettersOnly(person.name).length ===
+                killerLength
+            );
+        }
+    });
+
+
+    clues.push({
+        text:
+            `The killer's name contains exactly ` +
+            `${killerVowelCount} ` +
+            `${killerVowelCount === 1 ? "vowel" : "vowels"}.`,
+
+        priority: 70,
+
+        test: person => {
+            return (
+                countVowels(
+                    getLettersOnly(person.name)
+                ) === killerVowelCount
+            );
+        }
+    });
+
+
+    clues.push({
+        text:
+            `The killer's name contains exactly ` +
+            `${killerConsonantCount} ` +
+            `${killerConsonantCount === 1
+                ? "consonant"
+                : "consonants"}.`,
+
+        priority: 65,
+
         test: person => {
             const letters =
                 getLettersOnly(person.name);
 
             return (
-                letters.length - countVowels(letters) ===
-                killerConsonants
+                letters.length -
+                countVowels(letters) ===
+                killerConsonantCount
             );
         }
     });
 
-    clues.push({
-        text:
-            killerVowels >= 3
-                ? "The killer's name contains at least three vowels."
-                : "The killer's name contains fewer than three vowels.",
-        priority: 19,
-        test: person => {
-            const vowels =
-                countVowels(getLettersOnly(person.name));
-
-            return killerVowels >= 3
-                ? vowels >= 3
-                : vowels < 3;
-        }
-    });
-
-
-    /* ---------------------------------------------------------
-       REPEATED AND UNIQUE LETTERS
-    --------------------------------------------------------- */
-
-    const killerHasRepeatedLetter =
-        hasRepeatedLetter(killerLetters);
-
-    clues.push({
-        text:
-            killerHasRepeatedLetter
-                ? "The killer's name repeats at least one letter."
-                : "The killer's name does not repeat any letters.",
-        priority: 20,
-        test: person => {
-            return (
-                hasRepeatedLetter(getLettersOnly(person.name)) ===
-                killerHasRepeatedLetter
-            );
-        }
-    });
 
     clues.push({
         text:
             `The killer's name uses exactly ` +
-            `${killerUniqueLetters} different letters.`,
-        priority: 15,
+            `${killerUniqueLetterCount} different letters.`,
+
+        priority: 60,
+
         test: person => {
             const letters =
                 getLettersOnly(person.name);
 
             return (
                 new Set(letters).size ===
-                killerUniqueLetters
+                killerUniqueLetterCount
             );
         }
     });
 
 
-    /* ---------------------------------------------------------
-       CONTAINS OR DOES NOT CONTAIN LETTERS
+    /* -----------------------------------------------------
+       SPECIFIC FIRST AND LAST LETTER
+    ----------------------------------------------------- */
 
-       These are reusable category clues. They apply to every
-       suspect rather than targeting one name.
-    --------------------------------------------------------- */
+    clues.push({
+        text:
+            `The killer's name begins with the letter ` +
+            `${firstLetter.toUpperCase()}.`,
+
+        priority: 55,
+
+        test: person => {
+            return (
+                getLettersOnly(person.name).charAt(0) ===
+                firstLetter
+            );
+        }
+    });
+
+
+    clues.push({
+        text:
+            `The killer's name ends with the letter ` +
+            `${lastLetter.toUpperCase()}.`,
+
+        priority: 55,
+
+        test: person => {
+            const letters =
+                getLettersOnly(person.name);
+
+            return (
+                letters.charAt(letters.length - 1) ===
+                lastLetter
+            );
+        }
+    });
+
+
+    /* -----------------------------------------------------
+       LETTER-IN-NAME CLUES
+    ----------------------------------------------------- */
 
     const alphabet =
         "abcdefghijklmnopqrstuvwxyz";
@@ -699,13 +700,17 @@ function createCluePool(selectedKiller) {
                 killerContainsLetter
                     ? `The killer's name contains the letter ${letter.toUpperCase()}.`
                     : `The killer's name does not contain the letter ${letter.toUpperCase()}.`,
-            priority: killerContainsLetter ? 12 : 8,
+
+            priority:
+                killerContainsLetter ? 45 : 35,
+
             test: person => {
-                const letters =
-                    getLettersOnly(person.name);
+                const personContainsLetter =
+                    getLettersOnly(person.name)
+                        .includes(letter);
 
                 return (
-                    letters.includes(letter) ===
+                    personContainsLetter ===
                     killerContainsLetter
                 );
             }
@@ -713,30 +718,34 @@ function createCluePool(selectedKiller) {
     }
 
 
-    /* ---------------------------------------------------------
-       LETTER POSITIONS
+    /* -----------------------------------------------------
+       LETTER POSITION CLUES
 
-       These are used later when broad clues are no longer
-       enough to identify one person.
-    --------------------------------------------------------- */
+       These have the lowest priority and are only preferred
+       after broader clues stop being useful.
+    ----------------------------------------------------- */
 
     for (
         let position = 0;
         position < killerLetters.length;
         position++
     ) {
-        const letter =
+        const correctLetter =
             killerLetters.charAt(position);
 
         clues.push({
             text:
-                `The ${formatOrdinal(position + 1)} letter of ` +
-                `the killer's name is ${letter.toUpperCase()}.`,
-            priority: 2,
+                `The ${formatOrdinal(position + 1)} letter ` +
+                `of the killer's name is ` +
+                `${correctLetter.toUpperCase()}.`,
+
+            priority: 10,
+
             test: person => {
                 return (
-                    getLettersOnly(person.name).charAt(position) ===
-                    letter
+                    getLettersOnly(person.name)
+                        .charAt(position) ===
+                    correctLetter
                 );
             }
         });
@@ -747,7 +756,9 @@ function createCluePool(selectedKiller) {
 
 
 /* =========================================================
-   RENDER CLUES
+   DISPLAY CLUES
+
+   These rows have no click handlers.
 ========================================================= */
 
 function renderClues() {
@@ -755,13 +766,10 @@ function renderClues() {
 
     generatedClues.forEach((clue, index) => {
         const clueRow =
-            document.createElement("button");
+            document.createElement("div");
 
-        clueRow.type = "button";
         clueRow.className = "clue-row";
 
-        clueRow.dataset.clueIndex =
-            index.toString();
 
         const clueNumber =
             document.createElement("span");
@@ -777,21 +785,8 @@ function renderClues() {
         clueText.textContent = clue.text;
 
 
-        const clueStatus =
-            document.createElement("span");
-
-        clueStatus.className = "clue-status";
-        clueStatus.textContent = "Use";
-
-
         clueRow.appendChild(clueNumber);
         clueRow.appendChild(clueText);
-        clueRow.appendChild(clueStatus);
-
-
-        clueRow.addEventListener("click", function () {
-            toggleClue(index);
-        });
 
         cluesContainer.appendChild(clueRow);
     });
@@ -799,61 +794,7 @@ function renderClues() {
 
 
 /* =========================================================
-   APPLY OR REMOVE A CLUE
-========================================================= */
-
-function toggleClue(clueIndex) {
-    const clue =
-        generatedClues[clueIndex];
-
-    clue.active = !clue.active;
-
-    suspects.forEach(suspect => {
-        const passesClue =
-            clue.test(suspect);
-
-        if (clue.active && !passesClue) {
-            suspect.failedClues.add(clueIndex);
-        } else {
-            suspect.failedClues.delete(clueIndex);
-        }
-    });
-
-    updateClueAppearance(clueIndex);
-    updateAllSuspectStates();
-}
-
-
-function updateClueAppearance(clueIndex) {
-    const clue =
-        generatedClues[clueIndex];
-
-    const clueElement =
-        cluesContainer.querySelector(
-            `[data-clue-index="${clueIndex}"]`
-        );
-
-    if (!clueElement) {
-        return;
-    }
-
-    clueElement.classList.toggle(
-        "active",
-        clue.active
-    );
-
-    const status =
-        clueElement.querySelector(".clue-status");
-
-    if (status) {
-        status.textContent =
-            clue.active ? "Active" : "Use";
-    }
-}
-
-
-/* =========================================================
-   RENDER SUSPECTS
+   DISPLAY SUSPECTS
 ========================================================= */
 
 function renderSuspects() {
@@ -864,8 +805,21 @@ function renderSuspects() {
             document.createElement("div");
 
         suspectCell.className = "suspect-cell";
-        suspectCell.dataset.suspectId =
-            suspect.id.toString();
+
+        suspectCell.setAttribute(
+            "role",
+            "button"
+        );
+
+        suspectCell.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+        suspectCell.setAttribute(
+            "aria-pressed",
+            "false"
+        );
 
 
         const suspectName =
@@ -886,13 +840,36 @@ function renderSuspects() {
         suspectCell.appendChild(suspectGender);
 
 
-        suspectCell.addEventListener("click", function () {
-            suspect.manuallyEliminated =
-                !suspect.manuallyEliminated;
+        /*
+            The player manually eliminates suspects.
+        */
 
-            updateSuspectState(suspect);
-            updateRemainingSuspects();
-        });
+        suspectCell.addEventListener(
+            "click",
+            function () {
+                toggleSuspect(suspect);
+            }
+        );
+
+
+        /*
+            Keyboard support:
+
+            Enter or Space toggles the suspect.
+        */
+
+        suspectCell.addEventListener(
+            "keydown",
+            function (event) {
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+                    event.preventDefault();
+                    toggleSuspect(suspect);
+                }
+            }
+        );
 
 
         suspect.element = suspectCell;
@@ -903,52 +880,39 @@ function renderSuspects() {
 
 
 /* =========================================================
-   SUSPECT ELIMINATION STATE
+   MANUALLY ELIMINATE OR RESTORE A SUSPECT
 ========================================================= */
 
-function isSuspectEliminated(suspect) {
-    return (
-        suspect.manuallyEliminated ||
-        suspect.failedClues.size > 0
-    );
-}
+function toggleSuspect(suspect) {
+    suspect.eliminated =
+        !suspect.eliminated;
 
+    if (suspect.element) {
+        suspect.element.classList.toggle(
+            "eliminated",
+            suspect.eliminated
+        );
 
-function updateSuspectState(suspect) {
-    if (!suspect.element) {
-        return;
+        suspect.element.setAttribute(
+            "aria-pressed",
+            suspect.eliminated
+                ? "true"
+                : "false"
+        );
     }
 
-    const eliminated =
-        isSuspectEliminated(suspect);
-
-    suspect.element.classList.toggle(
-        "eliminated",
-        eliminated
-    );
-
-    suspect.element.classList.toggle(
-        "manual-elimination",
-        suspect.manuallyEliminated
-    );
-
-    suspect.element.setAttribute(
-        "aria-pressed",
-        eliminated ? "true" : "false"
-    );
-}
-
-
-function updateAllSuspectStates() {
-    suspects.forEach(updateSuspectState);
     updateRemainingSuspects();
 }
 
 
+/* =========================================================
+   UPDATE COUNTER
+========================================================= */
+
 function updateRemainingSuspects() {
     const remaining =
         suspects.filter(suspect => {
-            return !isSuspectEliminated(suspect);
+            return !suspect.eliminated;
         }).length;
 
     remainingSuspectsElement.textContent =
@@ -989,7 +953,9 @@ function shuffleArray(array) {
         index--
     ) {
         const randomIndex =
-            Math.floor(Math.random() * (index + 1));
+            Math.floor(
+                Math.random() * (index + 1)
+            );
 
         [array[index], array[randomIndex]] =
             [array[randomIndex], array[index]];
@@ -1003,7 +969,7 @@ function normalizeName(name) {
     return String(name)
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .toLocaleLowerCase();
+        .toLowerCase();
 }
 
 
@@ -1013,36 +979,39 @@ function getLettersOnly(name) {
 }
 
 
-function countVowels(text) {
-    let count = 0;
-
-    for (const letter of text) {
-        if (isVowel(letter)) {
-            count++;
-        }
-    }
-
-    return count;
-}
-
-
 function isVowel(letter) {
     return "aeiou".includes(letter);
 }
 
 
+function countVowels(text) {
+    let vowelCount = 0;
+
+    for (const letter of text) {
+        if (isVowel(letter)) {
+            vowelCount++;
+        }
+    }
+
+    return vowelCount;
+}
+
+
 function hasRepeatedLetter(text) {
-    return new Set(text).size < text.length;
+    return (
+        new Set(text).size <
+        text.length
+    );
 }
 
 
 function formatOrdinal(number) {
-    const remainder100 =
+    const finalTwoDigits =
         number % 100;
 
     if (
-        remainder100 >= 11 &&
-        remainder100 <= 13
+        finalTwoDigits >= 11 &&
+        finalTwoDigits <= 13
     ) {
         return `${number}th`;
     }

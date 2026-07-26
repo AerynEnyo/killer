@@ -58,6 +58,7 @@ body{
     padding-bottom:10px;
     text-align:center;
 }
+
 /* Suspect Grid */
 #suspectList{
     display:grid;
@@ -65,7 +66,7 @@ body{
     gap:12px;
 
     overflow-y:auto;
-    height:100%;
+    flex:1;
 
     padding:5px;
 }
@@ -94,7 +95,8 @@ body{
         background .2s,
         border-color .2s,
         transform .15s,
-        box-shadow .2s;
+        box-shadow .2s,
+        opacity .2s;
 }
 
 .suspect:hover{
@@ -108,6 +110,7 @@ body{
     transform:translateY(0) scale(.97);
 }
 
+/* Crossed out suspects */
 .suspect.eliminated{
     opacity:0.35;
     background:#222;
@@ -116,9 +119,7 @@ body{
     text-decoration:line-through;
 }
 
-.suspect.eliminated:hover{
-    opacity:0.6;
-}
+/* Remaining Counter */
 .remaining{
     margin-top:auto;
     border-top:2px solid #555;
@@ -127,12 +128,20 @@ body{
 }
 
 .remaining h3{
-    font-size:18px;
     margin-bottom:10px;
+    font-size:18px;
 }
 
 #remainingCount{
     font-size:42px;
     font-weight:bold;
+    color:white;
+}
+
+#remainingCount.one{
     color:#4CAF50;
+}
+
+#remainingCount.zero{
+    color:#ff5555;
 }

@@ -149,43 +149,23 @@ function addClue(clueText) {
 ========================= */
 
 function addSuspect(name, gender) {
-    const suspectCell =
-        document.createElement("div");
+    const suspectCell = document.createElement("div");
 
     suspectCell.className = "suspect-cell";
     suspectCell.dataset.eliminated = "false";
     suspectCell.dataset.name = name;
     suspectCell.dataset.gender = gender;
 
-    /*
-        Name is shown on the first line.
-        Gender is shown underneath.
-    */
-
-    const suspectName =
-        document.createElement("span");
-
+    const suspectName = document.createElement("span");
     suspectName.className = "suspect-name";
     suspectName.textContent = name;
 
-
-    const suspectGender =
-        document.createElement("span");
-
+    const suspectGender = document.createElement("span");
     suspectGender.className = "suspect-gender";
-
-    if (gender === "M") {
-        suspectGender.textContent = "Male";
-    } else if (gender === "F") {
-        suspectGender.textContent = "Female";
-    } else {
-        suspectGender.textContent = "Unknown";
-    }
-
+    suspectGender.textContent = gender;
 
     suspectCell.appendChild(suspectName);
     suspectCell.appendChild(suspectGender);
-
 
     suspectCell.addEventListener("click", function () {
         const isEliminated =
@@ -194,23 +174,19 @@ function addSuspect(name, gender) {
         if (isEliminated) {
             suspectCell.dataset.eliminated = "false";
             suspectCell.classList.remove("eliminated");
-
             eliminatedSuspects--;
         } else {
             suspectCell.dataset.eliminated = "true";
             suspectCell.classList.add("eliminated");
-
             eliminatedSuspects++;
         }
 
         updateRemainingSuspects();
     });
 
-
     suspectsContainer.appendChild(suspectCell);
 
     totalSuspects++;
-
     updateRemainingSuspects();
 
     return suspectCell;

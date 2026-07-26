@@ -9,10 +9,15 @@ fetch("names.txt")
         const suspectList = document.getElementById("suspectList");
 
         names.forEach(name => {
-            const div = document.createElement("div");
-            div.className = "suspect";
-            div.textContent = name;
-            suspectList.appendChild(div);
-        });
+    const div = document.createElement("div");
+    div.className = "suspect";
+    div.textContent = name;
+
+    div.addEventListener("click", () => {
+        div.classList.toggle("eliminated");
+    });
+
+    suspectList.appendChild(div);
+});
     })
     .catch(err => console.error(err));

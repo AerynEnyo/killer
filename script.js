@@ -45,6 +45,15 @@ const guessResult =
    START THE GAME
 ========================================================= */
 
+const guessInput =
+    document.getElementById("guessInput");
+
+const guessButton =
+    document.getElementById("guessButton");
+
+const guessResult =
+    document.getElementById("guessResult");
+
 async function startGame() {
     try {
         showLoadingMessage();

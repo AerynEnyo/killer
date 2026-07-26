@@ -8,37 +8,54 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Killer</title>
+    <title>Hunt the Killer</title>
 
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+
     <main class="game-board">
 
-        <!-- LEFT SIDE -->
+        <!-- LEFT COLUMN -->
         <section class="clues-section">
-            <div class="section-header">
-                <h1>Clues</h1>
+
+            <div class="section-title">
+                Clues
             </div>
 
-            <!-- Clues will be added here later -->
-            <div id="cluesContainer" class="clues-container"></div>
+            <!-- Clues get added here later -->
+            <div
+                id="cluesContainer"
+                class="clues-container"
+            ></div>
+
+            <!-- Fixed to the bottom of the clues column -->
+            <div class="hunt-row">
+                Hunt the Killer
+            </div>
+
+            <div class="remaining-row">
+                Remaining Suspects:
+                <span id="remainingSuspects">0</span>
+            </div>
+
         </section>
 
-        <!-- RIGHT SIDE -->
-        <section class="suspects-section">
-            <div class="section-header suspects-header">
-                <h1>Suspects</h1>
 
-                <p class="remaining-counter">
-                    Remaining Suspects:
-                    <span id="remainingSuspects">0</span>
-                </p>
+        <!-- RIGHT COLUMN -->
+        <section class="suspects-section">
+
+            <div class="section-title">
+                Suspects
             </div>
 
-            <!-- Suspects will be added here later -->
-            <div id="suspectsContainer" class="suspects-container"></div>
+            <!-- Suspects get added here later -->
+            <div
+                id="suspectsContainer"
+                class="suspects-container"
+            ></div>
+
         </section>
 
     </main>

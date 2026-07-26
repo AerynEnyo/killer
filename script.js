@@ -1118,18 +1118,12 @@ function verifyGuess() {
    START
 ========================================================= */
 
-guessButton.addEventListener(
-    "click",
-    verifyGuess
-);
+guessButton.addEventListener("click", verifyGuess);
 
-guessInput.addEventListener(
-    "keydown",
-    function (event) {
-        if (event.key === "Enter") {
-            verifyGuess();
-        }
+guessInput.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        verifyGuess();
     }
-);
+});
 
 startGame();

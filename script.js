@@ -1,94 +1,100 @@
-const suspectList = document.getElementById("suspectList");
-const clueList = document.getElementById("clueList");
-const remainingCount = document.getElementById("remainingCount");
+const suspectList =
+    document.getElementById("suspectList");
 
-/* ==========================
-   CLUES
-   ========================== */
+const clueList =
+    document.getElementById("clueList");
 
-const clues = [
-    "The name contains the letter A.",
-    "The name has exactly 7 letters.",
-    "The name does not end with a vowel.",
-    "The name contains exactly 3 vowels.",
-    "The name begins after L in the alphabet.",
-    "The name contains the letter I.",
-    "The name has no repeated letters.",
-    "The second letter is I.",
-    "The name contains the letter C.",
-    "The name ends with L."
-];
+const remainingCount =
+    document.getElementById("remainingCount");
 
-/* ==========================
-   DISPLAY CLUES
-   ========================== */
+window.onload = async () => {
 
-clues.forEach((clue, index) => {
+    const puzzle =
+        await generatePuzzle();
 
-    const div = document.createElement("div");
+    buildSuspects(
+        puzzle.suspects
+    );
 
-    div.className = "clue";
+    buildClues(
+        puzzle.clues
+    );
 
-    div.innerHTML = `
-        <strong>${index + 1}.</strong>
-        ${clue}
-    `;
+    updateRemaining();
 
-    clueList.appendChild(div);
+    console.log(
+        "ANSWER:",
+        puzzle.answer
+    );
 
-});
+};
 
-/* ==========================
-   REMAINING COUNTER
-   ========================== */
+function buildClues(clues){
 
-function updateRemainingCount() {
+    clueList.innerHTML="";
 
-    const remaining =
-        document.querySelectorAll(".suspect:not(.eliminated)").length;
+    clues.forEach((clue,index)=>{
 
-    remainingCount.textContent = remaining;
+        const div=
+            document.createElement("div");
 
-    remainingCount.classList.remove("one", "zero");
+        div.className="clue";
 
-    if (remaining === 1)
-        remainingCount.classList.add("one");
+        div.innerHTML=
 
-    if (remaining === 0)
-        remainingCount.classList.add("zero");
+        "<b>"+(index+1)+".</b> "
+
+        +clue.text;
+
+        clueList.appendChild(div);
+
+    });
+
 }
 
-/* ==========================
-   LOAD NAMES
-   ========================== */
+function buildSuspects(names){
 
-fetch("names.txt")
-    .then(response => response.text())
-    .then(text => {
+    suspectList.innerHTML="";
 
-        const names = text
-            .split("\n")
-            .map(name => name.trim())
-            .filter(name => name.length > 0);
+    names
+        .sort()
+        .forEach(name=>{
 
-        names.forEach(name => {
+            const card=
+                document.createElement("div");
 
-            const div = document.createElement("div");
+            card.className="suspect";
 
-            div.className = "suspect";
-            div.textContent = name;
+            card.innerText=name;
 
-            div.onclick = () => {
+            card.onclick=()=>{
 
-                div.classList.toggle("eliminated");
-                updateRemainingCount();
+                card.classList.toggle(
+                    "eliminated"
+                );
+
+                updateRemaining();
 
             };
 
-            suspectList.appendChild(div);
+            suspectList.appendChild(card);
 
         });
 
-        updateRemainingCount();
+}
 
-    });
+function updateRemaining(){
+
+    const remaining=
+
+    document.querySelectorAll(
+
+        ".suspect:not(.eliminated)"
+
+    ).length;
+
+    remainingCount.innerText=
+
+        remaining;
+
+}

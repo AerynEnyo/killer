@@ -126,6 +126,19 @@ async function startGame() {
 
         remainingSuspectsElement.textContent = "0";
     }
+   guessButton.addEventListener(
+    "click",
+    verifyGuess
+);
+
+guessInput.addEventListener(
+    "keydown",
+    function (event) {
+        if (event.key === "Enter") {
+            verifyGuess();
+        }
+    }
+);
 }
 
 
@@ -137,6 +150,23 @@ async function startGame() {
    Aaron,M
    Abby,F
 ========================================================= */
+function highlightKiller() {
+    if (!killer || !killer.element) {
+        return;
+    }
+
+    killer.eliminated = false;
+
+    killer.element.classList.remove("eliminated");
+    killer.element.classList.add("killer-found");
+
+    updateRemainingSuspects();
+
+    killer.element.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
 
 function parseNamesFile(fileText) {
     const people = [];

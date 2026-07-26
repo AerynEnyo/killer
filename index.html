@@ -31,10 +31,40 @@
                 class="clues-container"
             ></div>
 
-            <div class="remaining-row">
-                Remaining Suspects:
-                <span id="remainingSuspects">0</span>
-            </div>
+            <div class="guess-section">
+    <label for="guessInput" class="guess-label">
+        Enter Your Guess
+    </label>
+
+    <div class="guess-controls">
+        <input
+            id="guessInput"
+            class="guess-input"
+            type="text"
+            placeholder="Suspect name"
+            autocomplete="off"
+        >
+
+        <button
+            id="guessButton"
+            class="guess-button"
+            type="button"
+        >
+            Guess
+        </button>
+    </div>
+
+    <div
+        id="guessResult"
+        class="guess-result"
+        aria-live="polite"
+    ></div>
+</div>
+
+<div class="remaining-row">
+    Remaining Suspects:
+    <span id="remainingSuspects">0</span>
+</div>
 
         </section>
 

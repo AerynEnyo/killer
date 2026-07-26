@@ -164,6 +164,116 @@ body {
    REMAINING SUSPECTS COUNTER
 ========================================================= */
 
+/* =========================================================
+   KILLER GUESS
+========================================================= */
+
+.guess-section {
+    width: 100%;
+    min-height: 112px;
+
+    flex: 0 0 auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 10px 12px;
+
+    background-color: #292929;
+    border-top: 1px solid #4d4d4d;
+}
+
+.guess-label {
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.guess-controls {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+}
+
+.guess-input {
+    width: 100%;
+    min-width: 0;
+    height: 38px;
+
+    padding: 0 10px;
+
+    background-color: #1f1f1f;
+    color: #ffffff;
+
+    border: 1px solid #555555;
+    border-radius: 4px;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+}
+
+.guess-input::placeholder {
+    color: #888888;
+}
+
+.guess-input:focus {
+    border-color: #999999;
+}
+
+.guess-button {
+    height: 38px;
+
+    padding: 0 16px;
+
+    background-color: #3b3b3b;
+    color: #ffffff;
+
+    border: 1px solid #606060;
+    border-radius: 4px;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+.guess-button:hover {
+    background-color: #494949;
+}
+
+.guess-button:active {
+    background-color: #333333;
+}
+
+.guess-button:disabled,
+.guess-input:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+
+.guess-result {
+    min-height: 19px;
+
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.guess-result.correct {
+    color: #7ee296;
+}
+
+.guess-result.incorrect {
+    color: #ff9090;
+}
+
 .remaining-row {
     width: 100%;
     height: 58px;

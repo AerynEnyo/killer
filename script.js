@@ -1072,6 +1072,50 @@ function escapeHtml(value) {
         .replaceAll("'", "&#039;");
 }
 
+function verifyGuess() {
+    if (!killer) {
+        return;
+    }
+
+    const enteredGuess =
+        normalizeName(guessInput.value.trim());
+
+    if (!enteredGuess) {
+        guessResult.textContent =
+            "Enter a suspect name first.";
+
+        guessResult.className =
+            "guess-result incorrect";
+
+        guessInput.focus();
+        return;
+    }
+
+    const correctName =
+        normalizeName(killer.name);
+
+    if (enteredGuess === correctName) {
+        guessResult.textContent =
+            `Correct! ${killer.name} is the killer!`;
+
+        guessResult.className =
+            "guess-result correct";
+
+        guessInput.disabled = true;
+        guessButton.disabled = true;
+
+        highlightKiller();
+    } else {
+        guessResult.textContent =
+            "Incorrect guess. Keep investigating.";
+
+        guessResult.className =
+            "guess-result incorrect";
+
+        guessInput.select();
+        guessInput.focus();
+    }
+}
 
 /* =========================================================
    START

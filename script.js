@@ -116,9 +116,6 @@ async function startGame() {
 
         remainingSuspectsElement.textContent = "0";
     }
-   guessButton.addEventListener(
-    "click",
-    verifyGuess
 );
 
 

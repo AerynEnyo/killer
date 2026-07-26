@@ -32,18 +32,15 @@ body {
 ========================= */
 
 .game-board {
-    width: 1200px;
-    height: 700px;
-
-    flex: 0 0 auto;
+    width: 100vw;
+    height: 100vh;
 
     display: grid;
-    grid-template-columns: 400px 800px;
 
-    overflow: hidden;
+    grid-template-columns: 320px 1fr;
+    grid-template-rows: 70px 1fr;
 
-    background-color: #222222;
-    border: 1px solid #4a4a4a;
+    background: #222;
 }
 
 

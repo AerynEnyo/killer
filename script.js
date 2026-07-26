@@ -121,14 +121,7 @@ async function startGame() {
     verifyGuess
 );
 
-guessInput.addEventListener(
-    "keydown",
-    function (event) {
-        if (event.key === "Enter") {
-            verifyGuess();
-        }
-    }
-);
+
 }
 
 
@@ -1083,5 +1076,12 @@ function escapeHtml(value) {
 /* =========================================================
    START
 ========================================================= */
-
+guessInput.addEventListener(
+    "keydown",
+    function (event) {
+        if (event.key === "Enter") {
+            verifyGuess();
+        }
+    }
+);
 startGame();

@@ -1,3 +1,4 @@
+const remainingCount = document.getElementById("remainingCount");
 fetch("names.txt")
     .then(response => response.text())
     .then(text => {
@@ -21,3 +22,7 @@ fetch("names.txt")
 });
     })
     .catch(err => console.error(err));
+function updateRemainingCount() {
+    const remaining = document.querySelectorAll(".suspect:not(.eliminated)").length;
+    remainingCount.textContent = remaining;
+}

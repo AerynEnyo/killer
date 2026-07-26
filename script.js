@@ -1,53 +1,44 @@
 "use strict";
 
 
-/*
-    This file does not automatically add any clues or suspects.
+const cluesContainer =
+    document.getElementById("cluesContainer");
 
-    It only provides functions you can call later when you are
-    ready to add content.
-*/
+const suspectsContainer =
+    document.getElementById("suspectsContainer");
 
-
-const cluesContainer = document.getElementById("cluesContainer");
-const suspectsContainer = document.getElementById("suspectsContainer");
 const remainingSuspectsElement =
     document.getElementById("remainingSuspects");
 
-
-/*
-    Keeps track of how many suspects currently exist
-    and how many have been eliminated.
-*/
 
 let totalSuspects = 0;
 let eliminatedSuspects = 0;
 
 
 /*
-    Updates the remaining-suspects counter.
+    Updates the number displayed at the bottom
+    of the clues column.
 */
 
 function updateRemainingSuspects() {
-    const remaining = Math.max(
-        totalSuspects - eliminatedSuspects,
-        0
-    );
+    const remaining =
+        totalSuspects - eliminatedSuspects;
 
-    remainingSuspectsElement.textContent = remaining;
+    remainingSuspectsElement.textContent =
+        Math.max(remaining, 0);
 }
 
 
 /*
-    Adds one clue row.
+    Adds one clue.
 
     Example:
-
-    addClue("The killer wears glasses.");
+    addClue("The killer was wearing blue.");
 */
 
 function addClue(clueText) {
-    const clueRow = document.createElement("div");
+    const clueRow =
+        document.createElement("div");
 
     clueRow.className = "clue-row";
     clueRow.textContent = clueText;
@@ -59,17 +50,15 @@ function addClue(clueText) {
 
 
 /*
-    Adds one suspect cell.
-
-    Clicking the suspect toggles whether they are eliminated.
+    Adds one suspect.
 
     Example:
-
-    addSuspect("John");
+    addSuspect("Alex");
 */
 
 function addSuspect(suspectName) {
-    const suspectCell = document.createElement("div");
+    const suspectCell =
+        document.createElement("div");
 
     suspectCell.className = "suspect-cell";
     suspectCell.textContent = suspectName;
@@ -105,7 +94,7 @@ function addSuspect(suspectName) {
 
 
 /*
-    Removes every clue currently displayed.
+    Deletes all displayed clues.
 */
 
 function clearClues() {
@@ -114,7 +103,8 @@ function clearClues() {
 
 
 /*
-    Removes every suspect currently displayed.
+    Deletes all displayed suspects and resets
+    the remaining-suspects counter.
 */
 
 function clearSuspects() {
@@ -128,11 +118,10 @@ function clearSuspects() {
 
 
 /*
-    Manually set the remaining-suspects number without
-    creating any suspect cells.
+    Allows you to manually display a number
+    without adding suspect cells.
 
     Example:
-
     setRemainingSuspects(500);
 */
 
@@ -145,12 +134,12 @@ function setRemainingSuspects(amount) {
     }
 
     remainingSuspectsElement.textContent =
-        Math.floor(number).toString();
+        Math.floor(number);
 }
 
 
 /*
-    Starts the page with empty clue and suspect containers.
+    Start at zero without creating any cells.
 */
 
 updateRemainingSuspects();

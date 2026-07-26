@@ -1,114 +1,119 @@
 "use strict";
 
-
-const cluesContainer =
-    document.getElementById("cluesContainer");
-
-const suspectsContainer =
-    document.getElementById("suspectsContainer");
-
-const remainingSuspectsElement =
-    document.getElementById("remainingSuspects");
-
+const cluesContainer = document.getElementById("cluesContainer");
+const suspectsContainer = document.getElementById("suspectsContainer");
+const remainingSuspectsElement = document.getElementById("remainingSuspects");
 
 let totalSuspects = 0;
 let eliminatedSuspects = 0;
 
+updateRemainingSuspects();
 
-/*
-    Updates the remaining-suspects counter.
-*/
+async function loadNames() {
+    try {
+        const response = await fetch("names.txt");
+
+        if (!response.ok) {
+            throw new Error("Couldn't load names.txt");
+        }
+
+        const text = await response.text();
+
+        let names = text
+            .split(/\r?\n/)
+            .map(name => name.trim())
+            .filter(name => name.length > 0);
+
+        names = shuffle(names);
+
+        const selected = names.slice(0, 500);
+
+        clearSuspects();
+
+        for (const name of selected) {
+            addSuspect(name);
+        }
+
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function shuffle(array) {
+
+    for (let i = array.length - 1; i > 0; i--) {
+
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+
+    return array;
+}
 
 function updateRemainingSuspects() {
-    const remaining =
-        totalSuspects - eliminatedSuspects;
 
     remainingSuspectsElement.textContent =
-        Math.max(remaining, 0);
+        Math.max(totalSuspects - eliminatedSuspects, 0);
 }
 
+function addClue(text) {
 
-/*
-    Adds a clue to the clues column.
+    const clue = document.createElement("div");
 
-    Example:
-    addClue("The killer was wearing a hat.");
-*/
+    clue.className = "clue-row";
+    clue.textContent = text;
 
-function addClue(clueText) {
-    const clueRow =
-        document.createElement("div");
+    cluesContainer.appendChild(clue);
 
-    clueRow.className = "clue-row";
-    clueRow.textContent = clueText;
-
-    cluesContainer.appendChild(clueRow);
-
-    return clueRow;
+    return clue;
 }
 
+function addSuspect(name) {
 
-/*
-    Adds a suspect to the suspects column.
+    const suspect = document.createElement("div");
 
-    Clicking a suspect marks or unmarks them
-    as eliminated.
+    suspect.className = "suspect-cell";
+    suspect.textContent = name;
 
-    Example:
-    addSuspect("Alex");
-*/
+    suspect.dataset.eliminated = "false";
 
-function addSuspect(suspectName) {
-    const suspectCell =
-        document.createElement("div");
+    suspect.addEventListener("click", () => {
 
-    suspectCell.className = "suspect-cell";
-    suspectCell.textContent = suspectName;
-    suspectCell.dataset.eliminated = "false";
+        if (suspect.dataset.eliminated === "false") {
 
-    suspectCell.addEventListener("click", function () {
-        const isEliminated =
-            suspectCell.dataset.eliminated === "true";
-
-        if (isEliminated) {
-            suspectCell.dataset.eliminated = "false";
-            suspectCell.classList.remove("eliminated");
-
-            eliminatedSuspects--;
-        } else {
-            suspectCell.dataset.eliminated = "true";
-            suspectCell.classList.add("eliminated");
+            suspect.dataset.eliminated = "true";
+            suspect.classList.add("eliminated");
 
             eliminatedSuspects++;
+
+        } else {
+
+            suspect.dataset.eliminated = "false";
+            suspect.classList.remove("eliminated");
+
+            eliminatedSuspects--;
         }
 
         updateRemainingSuspects();
     });
 
-    suspectsContainer.appendChild(suspectCell);
+    suspectsContainer.appendChild(suspect);
 
     totalSuspects++;
 
     updateRemainingSuspects();
 
-    return suspectCell;
+    return suspect;
 }
 
-
-/*
-    Removes every clue.
-*/
-
 function clearClues() {
+
     cluesContainer.innerHTML = "";
 }
 
-
-/*
-    Removes every suspect and resets the counter.
-*/
-
 function clearSuspects() {
+
     suspectsContainer.innerHTML = "";
 
     totalSuspects = 0;
@@ -117,29 +122,4 @@ function clearSuspects() {
     updateRemainingSuspects();
 }
 
-
-/*
-    Sets the counter manually without creating suspects.
-
-    Example:
-    setRemainingSuspects(500);
-*/
-
-function setRemainingSuspects(amount) {
-    const number = Number(amount);
-
-    if (!Number.isFinite(number) || number < 0) {
-        remainingSuspectsElement.textContent = "0";
-        return;
-    }
-
-    remainingSuspectsElement.textContent =
-        Math.floor(number);
-}
-
-
-/*
-    Starts empty.
-*/
-
-updateRemainingSuspects();
+loadNames();

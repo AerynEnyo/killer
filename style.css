@@ -53,13 +53,14 @@ body{
     padding-bottom:10px;
     text-align:center;
 }
+/* Suspect Grid */
 #suspectList{
     display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
     gap:12px;
 
     overflow-y:auto;
-    height:calc(100vh - 160px);
+    height:100%;
 
     padding:5px;
 }
@@ -70,7 +71,8 @@ body{
     border:1px solid #555;
     border-radius:8px;
 
-    min-height:70px;
+    min-height:80px;
+    padding:10px;
 
     display:flex;
     justify-content:center;
@@ -81,15 +83,22 @@ body{
     text-align:center;
 
     cursor:pointer;
-    transition:0.2s;
+    user-select:none;
+
+    transition:
+        background .2s,
+        border-color .2s,
+        transform .15s,
+        box-shadow .2s;
 }
 
 .suspect:hover{
     background:#444;
     border-color:#888;
     transform:translateY(-2px);
+    box-shadow:0 4px 10px rgba(0,0,0,.35);
 }
 
 .suspect:active{
-    transform:scale(.97);
+    transform:translateY(0) scale(.97);
 }

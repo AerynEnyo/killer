@@ -2,48 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Investigation Board</title>
 
-    <link rel="stylesheet" href="style.css?v=1">
-
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+    <header class="top-bar">
+        <h1>Investigation Board</h1>
+    </header>
 
-<header class="top-bar">
-    <h1>Name Investigation</h1>
-</header>
+    <main class="board">
+        <!-- LEFT COLUMN -->
+        <section class="panel clues-panel">
+            <h2 class="panel-header">Clues</h2>
 
-<main class="content">
+            <div class="clue-list">
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+                <div class="clue-row"></div>
+            </div>
+        </section>
 
-    <section class="panel">
+        <!-- RIGHT COLUMN -->
+        <section class="panel suspects-panel">
+            <div class="suspects-heading">
+                <h2 class="panel-header">Suspects</h2>
 
-        <h2>Clues</h2>
+                <div class="remaining-counter">
+                    Remaining Suspects:
+                    <span id="remainingCount">0</span>
+                </div>
+            </div>
 
-        <div id="clueList"></div>
+            <div class="suspect-grid">
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
 
-        <div class="remaining">
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
 
-            <h3>Remaining Suspects</h3>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
 
-            <div id="remainingCount">0</div>
-
-        </div>
-
-    </section>
-
-    <section class="panel">
-
-        <h2>Suspects</h2>
-
-        <div id="suspectList"></div>
-
-    </section>
-
-</main>
-
-<script src="generator.js"></script>
-<script src="script.js?v=1"></script>
-
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+                <div class="suspect-cell"></div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>

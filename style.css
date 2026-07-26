@@ -107,3 +107,15 @@ body{
 .suspect:active{
     transform:translateY(0) scale(.97);
 }
+
+.suspect.eliminated{
+    opacity:0.35;
+    background:#222;
+    border-color:#444;
+    color:#888;
+    text-decoration:line-through;
+}
+
+.suspect.eliminated:hover{
+    opacity:0.6;
+}

@@ -1,7 +1,3 @@
-/* =========================
-   RESET
-========================= */
-
 * {
     box-sizing: border-box;
     margin: 0;
@@ -11,7 +7,7 @@
 html,
 body {
     width: 100%;
-    min-height: 100%;
+    height: 100%;
 }
 
 body {
@@ -20,15 +16,15 @@ body {
 
     overflow: hidden;
 
-    background: #1d1d1d;
-    color: white;
+    background-color: #1d1d1d;
+    color: #ffffff;
 
     font-family: Arial, Helvetica, sans-serif;
 }
 
 
 /* =========================
-   FIXED GAME BOARD
+   FULL-SCREEN BOARD
 ========================= */
 
 .game-board {
@@ -40,12 +36,33 @@ body {
     grid-template-columns: 320px 1fr;
     grid-template-rows: 70px 1fr;
 
-    background: #222;
+    background-color: #222222;
 }
 
 
 /* =========================
-   COLUMN STRUCTURE
+   TOP HEADER
+========================= */
+
+.page-header {
+    grid-column: 1 / 3;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #2b2b2b;
+
+    border-bottom: 1px solid #494949;
+
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+}
+
+
+/* =========================
+   MAIN COLUMNS
 ========================= */
 
 .clues-section,
@@ -60,56 +77,57 @@ body {
 }
 
 .clues-section {
-    border-right: 1px solid #4a4a4a;
+    border-right: 1px solid #494949;
 }
 
 
 /* =========================
-   SECTION HEADERS
+   COLUMN HEADERS
 ========================= */
 
 .section-title {
     width: 100%;
-    height: 84px;
+    height: 64px;
 
-    flex: 0 0 84px;
+    flex: 0 0 64px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     background-color: #2b2b2b;
-    border-bottom: 1px solid #4a4a4a;
 
-    font-size: 30px;
+    border-bottom: 1px solid #494949;
+
+    font-size: 24px;
     font-weight: 700;
     text-align: center;
 }
 
 
 /* =========================
-   CLUES CONTAINER
+   CLUES AREA
 ========================= */
 
 .clues-container {
     flex: 1;
     min-height: 0;
 
-    padding: 14px;
-
     display: flex;
     flex-direction: column;
+
     gap: 10px;
+    padding: 12px;
 
     overflow-y: auto;
 }
 
 
-/* Clues are not automatically created */
+/* Only used when JavaScript adds clues */
 
 .clue-row {
     width: 100%;
-    min-height: 55px;
+    min-height: 58px;
 
     flex: 0 0 auto;
 
@@ -119,15 +137,18 @@ body {
     align-items: center;
 
     background-color: #303030;
-    border: 1px solid #4d4d4d;
+
+    border: 1px solid #505050;
+    border-radius: 4px;
+
+    font-size: 16px;
 }
 
 
 /* =========================
-   BOTTOM LEFT ROWS
+   REMAINING SUSPECTS
 ========================= */
 
-.hunt-row,
 .remaining-row {
     width: 100%;
     height: 58px;
@@ -138,51 +159,47 @@ body {
     align-items: center;
     justify-content: center;
 
-    background-color: #2b2b2b;
-    border-top: 1px solid #4a4a4a;
+    gap: 6px;
 
+    background-color: #2b2b2b;
+
+    border-top: 1px solid #494949;
+
+    font-size: 16px;
+    font-weight: 700;
     text-align: center;
 }
 
-.hunt-row {
-    font-size: 21px;
-    font-weight: 700;
-}
-
-.remaining-row {
-    gap: 6px;
-
-    font-size: 18px;
-    font-weight: 700;
-}
-
 #remainingSuspects {
-    min-width: 24px;
     display: inline-block;
+    min-width: 20px;
 }
 
 
 /* =========================
-   SUSPECTS CONTAINER
+   SUSPECTS AREA
 ========================= */
 
 .suspects-container {
     flex: 1;
     min-height: 0;
 
-    padding: 14px;
-
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+
+    grid-template-columns:
+        repeat(auto-fill, minmax(140px, 1fr));
+
     grid-auto-rows: 68px;
     align-content: start;
+
     gap: 10px;
+    padding: 12px;
 
     overflow-y: auto;
 }
 
 
-/* Suspects are not automatically created */
+/* Only used when JavaScript adds suspects */
 
 .suspect-cell {
     min-width: 0;
@@ -195,15 +212,21 @@ body {
     justify-content: center;
 
     background-color: #303030;
-    border: 1px solid #4d4d4d;
+
+    border: 1px solid #505050;
+    border-radius: 4px;
 
     text-align: center;
     cursor: pointer;
     user-select: none;
+
+    transition:
+        background-color 0.15s ease,
+        opacity 0.15s ease;
 }
 
 .suspect-cell:hover {
-    background-color: #383838;
+    background-color: #3a3a3a;
 }
 
 .suspect-cell.eliminated {
@@ -231,16 +254,47 @@ body {
     background-color: #555555;
 }
 
+.clues-container::-webkit-scrollbar-thumb:hover,
+.suspects-container::-webkit-scrollbar-thumb:hover {
+    background-color: #666666;
+}
+
 
 /* =========================
    SMALLER SCREENS
 ========================= */
 
-@media screen and (max-width: 1220px),
-       screen and (max-height: 720px) {
-
+@media screen and (max-width: 700px) {
     body {
-        align-items: flex-start;
-        justify-content: flex-start;
+        overflow: auto;
+    }
+
+    .game-board {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+
+        grid-template-columns: 1fr;
+        grid-template-rows: 70px auto auto;
+    }
+
+    .page-header {
+        grid-column: 1;
+    }
+
+    .clues-section {
+        min-height: 450px;
+
+        border-right: none;
+        border-bottom: 1px solid #494949;
+    }
+
+    .suspects-section {
+        min-height: 600px;
+    }
+
+    .suspects-container {
+        grid-template-columns:
+            repeat(2, minmax(100px, 1fr));
     }
 }

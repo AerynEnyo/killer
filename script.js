@@ -31,6 +31,15 @@ let suspects = [];
 let killer = null;
 let generatedClues = [];
 
+const guessInput =
+    document.getElementById("guessInput");
+
+const guessButton =
+    document.getElementById("guessButton");
+
+const guessResult =
+    document.getElementById("guessResult");
+
 
 /* =========================================================
    START THE GAME

@@ -145,3 +145,36 @@ body{
 #remainingCount.zero{
     color:#ff5555;
 }
+
+/* ==========================
+   CLUES
+   ========================== */
+
+#clueList{
+
+    display:flex;
+    flex-direction:column;
+
+    gap:12px;
+
+    overflow-y:auto;
+
+    padding-right:10px;
+
+}
+
+.clue{
+
+    background:#2d2f31;
+
+    border-left:5px solid #4CAF50;
+
+    padding:12px;
+
+    border-radius:6px;
+
+    line-height:1.5;
+
+    font-size:16px;
+
+}
